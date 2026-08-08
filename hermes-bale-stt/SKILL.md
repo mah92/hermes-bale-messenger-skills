@@ -1,7 +1,7 @@
 ---
 name: hermes-bale-stt
 description: "Use when adding Persian STT to Bale on Hermes. Configures speech-to-text so voice messages are transcribed."
-version: 1.1.0
+version: 1.2.0
 author: علی محمودی
 license: MIT
 metadata:
@@ -43,8 +43,12 @@ This downloads:
 
 ### 3. Install dependencies
 
+**IMPORTANT:** Install into Hermes' own venv, NOT system Python. The STT
+provider command runs under the Hermes agent's Python so sherpa-onnx must be
+discoverable there.
+
 ```bash
-pip install sherpa-onnx soundfile numpy scipy
+~/.hermes/hermes-agent/venv/bin/pip install sherpa-onnx soundfile numpy scipy
 sudo apt-get install ffmpeg
 ```
 
@@ -110,7 +114,7 @@ stt:
   providers:
     shenava:
       type: command
-      command: python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/stt.py --quiet {input_path}
+      command: ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/stt.py --quiet {input_path}
 ```
 
 Then restart the gateway.
@@ -137,8 +141,8 @@ Models are downloaded via `download_models.py` — no submodules needed.
 
 | Component | Required | Notes |
 |-----------|----------|-------|
-| Python: sherpa-onnx | ✅ | `pip install sherpa-onnx` |
-| Python: soundfile, numpy, scipy | ✅ | `pip install soundfile numpy scipy` |
+| Python: sherpa-onnx | ✅ | Install via `~/.hermes/hermes-agent/venv/bin/pip` |
+| Python: soundfile, numpy, scipy | ✅ | Install via `~/.hermes/hermes-agent/venv/bin/pip` |
 | System: ffmpeg | ✅ | `sudo apt-get install ffmpeg` |
 | Shenava-Koochik model | ✅ | Downloaded by `download_models.py` (~126 MB) |
 | hush_cpp | — | Optional denoiser. Downloaded by `download_models.py` |
@@ -171,7 +175,7 @@ transcribed text, STT is working.
 To test from the terminal:
 
 ```bash
-python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/stt.py test_voice.ogg
+~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/stt.py test_voice.ogg
 ```
 
 ## Common Pitfalls
@@ -179,10 +183,11 @@ python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/st
 1. **Voice messages still empty.** Check:
    - `stt.provider` set to `shenava` in config.yaml
    - Gateway restarted after config change
-   - `sherpa-onnx` installed (`pip list | grep sherpa-onnx`)
+   - `sherpa-onnx` installed in Hermes venv: `~/.hermes/hermes-agent/venv/bin/pip list | grep sherpa-onnx`
    - Model files downloaded (`python3 scripts/download_models.py`)
-2. **ModuleNotFoundError: sherpa_onnx.** Install: `pip install sherpa-onnx`
+2. **ModuleNotFoundError: sherpa_onnx.** Install into Hermes venv: `~/.hermes/hermes-agent/venv/bin/pip install sherpa-onnx soundfile numpy scipy`
 3. **ffmpeg not found.** Install: `sudo apt-get install ffmpeg`
 4. **Model not downloaded.** Run `python3 scripts/download_models.py` to download model (~126 MB) + optional hush_cpp.
 5. **Large voice files skipped.** Bale plugin skips audio > `BALE_MAX_VOICE_DURATION` seconds (default 30). Set to 0 in `.env` to disable limit.
 6. **Hush denoiser missing.** Gracefully skipped. Set `STT_HUSH_BINARY` env var to custom path.
+7. **Using system python3 instead of Hermes venv.** The STT provider runs inside Hermes, so sherpa-onnx must be installed in `~/.hermes/hermes-agent/venv/`, not system-wide. Always use `~/.hermes/hermes-agent/venv/bin/pip` for installs and `~/.hermes/hermes-agent/venv/bin/python` for testing.
