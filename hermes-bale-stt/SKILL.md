@@ -39,7 +39,26 @@ python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/do
 
 This downloads:
 - Shenava-Koochik v1.0 int8 ONNX model (~126 MB)
-- hush_cpp denoiser source (optional)
+- hush_cpp denoiser source
+
+#### ⚠️ Verify the download — do NOT skip this step
+
+`download_models.py` may report success even when files failed to write.
+Always verify:
+
+```bash
+# Must show ~126MB file, NOT 134 bytes (LFS pointer) and NOT missing
+ls -lh ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/models/shenava-koochik/model.int8.onnx
+
+# Must show hush_cpp source files (CMakeLists.txt, src/, onnx/)
+ls ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/models/hush_cpp/CMakeLists.txt
+```
+
+If files are missing, re-run with `--force`:
+
+```bash
+python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/download_models.py --force
+```
 
 ### 3. Install dependencies
 
@@ -57,7 +76,8 @@ sudo apt-get install ffmpeg
 Hush denoises voice audio before transcription — cleaner input means better accuracy.
 The source is downloaded by `download_models.py`, so run that first.
 
-Build fails without `cmake` or ONNX Runtime. Install whatever is missing, then retry.
+**Try hard to build this.** Install any missing dependencies (cmake, ONNX Runtime) and
+retry — do NOT give up at the first error. Only skip if you've exhausted every option.
 
 #### 4a. Install build tools (required)
 
@@ -187,7 +207,9 @@ To test from the terminal:
    - Model files downloaded (`python3 scripts/download_models.py`)
 2. **ModuleNotFoundError: sherpa_onnx.** Install into Hermes venv: `~/.hermes/hermes-agent/venv/bin/pip install sherpa-onnx soundfile numpy scipy`
 3. **ffmpeg not found.** Install: `sudo apt-get install ffmpeg`
-4. **Model not downloaded.** Run `python3 scripts/download_models.py` to download model (~126 MB) + optional hush_cpp.
+4. **Model not downloaded.** Run `python3 scripts/download_models.py` to download model (~126 MB) + hush_cpp. **Always verify files exist after download** — the script may report "Done!" even when files failed to write. Check: `ls -lh models/shenava-koochik/model.int8.onnx` (must be ~126MB).
 5. **Large voice files skipped.** Bale plugin skips audio > `BALE_MAX_VOICE_DURATION` seconds (default 30). Set to 0 in `.env` to disable limit.
-6. **Hush denoiser missing.** Gracefully skipped. Set `STT_HUSH_BINARY` env var to custom path.
+6. **Hush denoiser missing.** Set `STT_HUSH_BINARY` env var to custom path. But you should BUILD it instead — see step 4.
 7. **Using system python3 instead of Hermes venv.** The STT provider runs inside Hermes, so sherpa-onnx must be installed in `~/.hermes/hermes-agent/venv/`, not system-wide. Always use `~/.hermes/hermes-agent/venv/bin/pip` for installs and `~/.hermes/hermes-agent/venv/bin/python` for testing.
+8. **download_models.py silent failure.** The script can print "Done!" but files may be empty or missing (e.g. if a previous run left broken files and the script's existence check skips re-download). Always verify the actual file sizes after download. If model.int8.onnx is not ~126MB, use `--force` flag.
+9. **Agent gave up on hush_cpp too early.** The label "optional" means the pipeline works without it, not that you should skip it. Install missing tools (cmake, build-essential, ONNX Runtime) and retry. Exhaust every option before conceding — denoising makes a real difference for voice quality.
