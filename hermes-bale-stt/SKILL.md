@@ -1,7 +1,7 @@
 ---
 name: hermes-bale-stt
 description: "Use when adding Persian STT to Bale on Hermes. Configures speech-to-text so voice messages are transcribed."
-version: 1.2.0
+version: 1.2.1
 author: علی محمودی
 license: MIT
 metadata:
@@ -213,3 +213,5 @@ To test from the terminal:
 7. **Using system python3 instead of Hermes venv.** The STT provider runs inside Hermes, so sherpa-onnx must be installed in `~/.hermes/hermes-agent/venv/`, not system-wide. Always use `~/.hermes/hermes-agent/venv/bin/pip` for installs and `~/.hermes/hermes-agent/venv/bin/python` for testing.
 8. **download_models.py silent failure.** The script can print "Done!" but files may be empty or missing (e.g. if a previous run left broken files and the script's existence check skips re-download). Always verify the actual file sizes after download. If model.int8.onnx is not ~126MB, use `--force` flag.
 9. **Agent gave up on hush_cpp too early.** The label "optional" means the pipeline works without it, not that you should skip it. Install missing tools (cmake, build-essential, ONNX Runtime) and retry. Exhaust every option before conceding — denoising makes a real difference for voice quality.
+10. **LD_LIBRARY_PATH conflicts with hush.** If hush crashes with "version VERS_X.X.X not found", a custom LD_LIBRARY_PATH (e.g. ~/local/lib) may be loading an incompatible ONNX Runtime. stt.py now strips LD_LIBRARY_PATH and LD_PRELOAD before running hush so it links against the system library it was built with.
+11. **Missing --quiet flag in config.yaml.** The STT provider command in config.yaml MUST include `--quiet` to suppress verbose output. Without it, diagnostic lines (timings, denoise status) pollute the transcribed text and get fed to the agent as user input.

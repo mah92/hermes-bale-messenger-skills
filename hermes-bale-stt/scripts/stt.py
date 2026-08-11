@@ -112,10 +112,11 @@ def denoise_wav(wav_path: str, verbose: bool = True) -> str:
         t0 = time.time()
 
     hush_env = os.environ.copy()
-    # Add local lib path for ONNX Runtime (needed if not in system paths)
-    local_lib = os.path.expanduser("~/local/lib")
-    if os.path.isdir(local_lib):
-        hush_env["LD_LIBRARY_PATH"] = local_lib + ":" + hush_env.get("LD_LIBRARY_PATH", "")
+    # Strip LD_LIBRARY_PATH so hush links against the SYSTEM ONNX Runtime
+    # it was built against (/usr/local/lib via ldconfig), not a possibly
+    # incompatible version in ~/local/lib or elsewhere.
+    hush_env.pop("LD_LIBRARY_PATH", None)
+    hush_env.pop("LD_PRELOAD", None)
 
     # First try with --quiet, fall back without it (some platforms segfault with --quiet)
     for args in ([HUSH_BINARY, "--quiet", wav_path, out_path],
