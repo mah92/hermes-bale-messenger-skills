@@ -44,15 +44,23 @@ This downloads:
 
 ### 3. Build the C++ binary
 
-The binary lives at `~/Basir/TTS/match_tts_infer/`. It needs cmake, a C++17 compiler, and ONNX Runtime.
+#### 3a. Clone the repo (if not already done)
 
-#### 3a. Install build tools and libraries (required)
+```bash
+mkdir -p ~/Basir/TTS
+cd ~/Basir/TTS
+git clone --recurse-submodules https://github.com/mah92/matcha_tts_infer.git
+```
+
+This clones `matcha_tts_infer` + the `NormalizeText` submodule (ezafe, hazm, shakkelha, homograph, espeak-ng).
+
+#### 3b. Install build tools and libraries (required)
 
 ```bash
 sudo apt-get install -y cmake build-essential libespeak-ng-dev libicu-dev
 ```
 
-#### 3b. Install ONNX Runtime (required)
+#### 3c. Install ONNX Runtime (required)
 
 The binary links against ONNX Runtime for model inference.
 
@@ -72,19 +80,19 @@ sudo cp -r onnxruntime-linux-x64-1.20.0/include/* /usr/local/include/
 sudo ldconfig
 ```
 
-#### 3c. Build MatchaTTSInfer
+#### 3d. Build MatchaTTSInfer
 
 ```bash
-cd ~/Basir/TTS/match_tts_infer
+cd ~/Basir/TTS/matcha_tts_infer
 mkdir -p build && cd build
 cmake ..
 make -j$(nproc)
 ```
 
-#### 3d. Verify the build
+#### 3e. Verify the build
 
 ```bash
-ls -la ~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer
+ls -la ~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer
 ```
 
 If the binary exists (~250 KB), it's ready.
@@ -94,8 +102,8 @@ If the binary exists (~250 KB), it's ready.
 The daemon MUST run from the `NormalizeText/` directory (assets are at `./assets/`):
 
 ```bash
-cd ~/Basir/TTS/match_tts_infer/NormalizeText
-~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --daemon &
+cd ~/Basir/TTS/matcha_tts_infer/NormalizeText
+~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &
 ```
 
 Wait ~2.5 seconds for models to load, then verify:
@@ -110,7 +118,7 @@ Should return JSON with `"status":"ok"` and a WAV path.
 
 ```bash
 # Crontab
-@reboot cd ~/Basir/TTS/match_tts_infer/NormalizeText && ~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --daemon &
+@reboot cd ~/Basir/TTS/matcha_tts_infer/NormalizeText && ~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &
 ```
 
 ### 5. Configure Hermes
@@ -166,15 +174,15 @@ Subsequent requests skip all loading — just normalize + synthesize.
 | File | Purpose |
 |------|---------|
 | `scripts/tts.py` | TTS command provider — talks to daemon, converts to OGG |
-| `~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer` | C++ binary (built separately) |
+| `~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer` | C++ binary (built separately) |
 | `/tmp/tts_infer.sock` | Daemon socket (created at startup, cleaned on stop) |
 
 ## Managing the Daemon
 
 ```bash
 # Start (from NormalizeText directory!)
-cd ~/Basir/TTS/match_tts_infer/NormalizeText
-~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --daemon &
+cd ~/Basir/TTS/matcha_tts_infer/NormalizeText
+~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &
 
 # Check if running
 [ -S /tmp/tts_infer.sock ] && echo "running" || echo "stopped"
@@ -183,8 +191,8 @@ cd ~/Basir/TTS/match_tts_infer/NormalizeText
 echo '{"text":"سلام","output":"/tmp/test.wav"}' | nc -U /tmp/tts_infer.sock
 
 # Stop gracefully
-cd ~/Basir/TTS/match_tts_infer/NormalizeText
-~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --stop
+cd ~/Basir/TTS/matcha_tts_infer/NormalizeText
+~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --stop
 
 # Force kill
 pkill -f "MatchaTTSInfer --daemon"
@@ -194,7 +202,7 @@ rm -f /tmp/tts_infer.sock
 ## Common Pitfalls
 
 1. **Socket not found.** Daemon not running. Start it with `--daemon` from the `NormalizeText/` directory.
-2. **Failed to load SentencePiece model.** Binary must run from `NormalizeText/` directory so `./assets/` resolves correctly. Always `cd ~/Basir/TTS/match_tts_infer/NormalizeText` before starting daemon.
+2. **Failed to load SentencePiece model.** Binary must run from `NormalizeText/` directory so `./assets/` resolves correctly. Always `cd ~/Basir/TTS/matcha_tts_infer/NormalizeText` before starting daemon.
 3. **Daemon dies after first request.** SIGPIPE when client disconnects mid-request. The daemon now ignores SIGPIPE — rebuild if using an older version.
 4. **Daemon dies on health check.** Don't use `nc -z` or quick-connect tests — each connect consumes one `accept()` slot. Use `test -S /tmp/tts_infer.sock` to check if running, or `echo '{"command":"stop"}' | nc -U` for graceful shutdown.
 5. **Empty text passed to tts.py.** Hermes writes text to `{input_path}`. The script reads it with UTF-8 encoding. Non-Persian text or empty files produce silent audio — check the input file content.

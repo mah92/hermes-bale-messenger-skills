@@ -71,8 +71,8 @@ def main():
     # Check if daemon is running
     if not os.path.exists(SOCKET_PATH):
         print("Error: TTS daemon not running", file=sys.stderr)
-        print(f"Start it: cd ~/Basir/TTS/match_tts_infer/NormalizeText && "
-              f"~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --daemon &",
+        print(f"Start it: cd ~/Basir/TTS/matcha_tts_infer/NormalizeText && "
+              f"~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &",
               file=sys.stderr)
         sys.exit(1)
 
