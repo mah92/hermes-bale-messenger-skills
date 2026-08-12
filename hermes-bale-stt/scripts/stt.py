@@ -62,9 +62,9 @@ def validate_and_convert(audio_path: str) -> str:
         )
         if is_valid:
             return audio_path
-        print(f"  Input: {info.samplerate}Hz, {info.channels}ch, {info.subtype} -> converting...")
+        print(f"  Input: {info.samplerate}Hz, {info.channels}ch, {info.subtype} -> converting...", file=sys.stderr)
     except Exception:
-        print(f"  Input: unknown format -> converting...")
+        print(f"  Input: unknown format -> converting...", file=sys.stderr)
 
     # Convert with ffmpeg
     tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
@@ -80,7 +80,7 @@ def validate_and_convert(audio_path: str) -> str:
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        print(f"  ffmpeg error: {result.stderr[-500:]}")
+        print(f"  ffmpeg error: {result.stderr[-500:]}", file=sys.stderr)
         sys.exit(1)
 
     return out_path
