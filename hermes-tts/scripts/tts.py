@@ -12,51 +12,72 @@ import json
 import socket
 import subprocess
 import tempfile
+import time
 
 SOCKET_PATH = "/tmp/tts_infer.sock"
+MAX_RETRIES = 3  # try 3 times total
 
 
 def _send_request(text: str, output_wav: str, speed: float = 1.0) -> dict:
-    """Send a synthesis request to the daemon. Returns parsed JSON response."""
+    """Send a synthesis request to the daemon. Retries up to MAX_RETRIES times."""
     request = json.dumps({
         "text": text,
         "output": output_wav,
         "speed": speed,
     }, ensure_ascii=False)
 
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.settimeout(30)
-    try:
-        sock.connect(SOCKET_PATH)
-        sock.sendall((request + "\n").encode("utf-8"))
+    last_error = ""
+    for attempt in range(MAX_RETRIES):
+        if attempt > 0:
+            time.sleep(1)
+        try:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.settimeout(30)
+            sock.connect(SOCKET_PATH)
+            sock.sendall((request + "\n").encode("utf-8"))
 
-        # Read response line
-        response = b""
-        while True:
-            ch = sock.recv(1)
-            if not ch or ch == b"\n":
-                break
-            response += ch
-    finally:
-        sock.close()
+            response = b""
+            while True:
+                ch = sock.recv(1)
+                if not ch or ch == b"\n":
+                    break
+                response += ch
+            sock.close()
 
-    if not response:
-        return {"status": "error", "message": "no response from daemon"}
+            if not response:
+                last_error = "no response from daemon"
+                continue
 
-    try:
-        return json.loads(response.decode("utf-8"))
-    except json.JSONDecodeError:
-        return {"status": "error", "message": f"invalid JSON: {response[:200]}"}
+            result = json.loads(response.decode("utf-8"))
+            if result.get("status") == "ok":
+                return result
+            last_error = result.get("message", "unknown error")
+            continue
+        except (socket.error, ConnectionRefusedError, OSError) as e:
+            last_error = str(e)
+            continue
+
+    return {"status": "error", "message": last_error}
 
 
 def _wav_to_ogg(wav_path: str, ogg_path: str) -> None:
-    """Convert WAV to OGG OPUS (mono 16kHz, voip-optimized)."""
-    subprocess.run([
-        "ffmpeg", "-y", "-i", wav_path,
-        "-c:a", "libopus", "-b:a", "32k",
-        "-ar", "16000", "-ac", "1",
-        "-application", "voip", ogg_path,
-    ], capture_output=True, check=True, timeout=30)
+    """Convert WAV to OGG OPUS (mono 16kHz, voip-optimized). Retries on failure."""
+    last_err = None
+    for attempt in range(MAX_RETRIES):
+        if attempt > 0:
+            time.sleep(1)
+        try:
+            subprocess.run([
+                "ffmpeg", "-y", "-i", wav_path,
+                "-c:a", "libopus", "-b:a", "32k",
+                "-ar", "16000", "-ac", "1",
+                "-application", "voip", ogg_path,
+            ], capture_output=True, check=True, timeout=30)
+            return
+        except subprocess.CalledProcessError as e:
+            last_err = e
+            continue
+    raise last_err if last_err else RuntimeError("ffmpeg failed after retries")
 
 
 def main():
