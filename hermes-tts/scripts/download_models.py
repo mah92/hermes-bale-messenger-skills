@@ -119,15 +119,20 @@ def main():
     print("Done! Models are in:", MODEL_DIR)
     print()
     print("Next steps:")
-    print(f"  1. Build the C++ binary if not already done:")
+    print(f"  1. Install build dependencies if not already done:")
+    print(f"     sudo apt-get install -y cmake build-essential libespeak-ng-dev libicu-dev")
+    print()
+    print(f"  2. Install ONNX Runtime (see SKILL.md for download + install steps)")
+    print()
+    print(f"  3. Build the C++ binary:")
     print(f"     cd ~/Basir/TTS/match_tts_infer && mkdir -p build && cd build")
     print(f"     cmake .. && make -j$(nproc)")
     print()
-    print(f"  2. Start the daemon:")
+    print(f"  4. Start the daemon:")
     print(f"     cd ~/Basir/TTS/match_tts_infer/NormalizeText")
     print(f"     ~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --daemon &")
     print()
-    print(f"  3. Configure Hermes — see SKILL.md for config.yaml snippet.")
+    print(f"  5. Configure Hermes — see SKILL.md for config.yaml snippet.")
 
 
 if __name__ == "__main__":

@@ -46,10 +46,10 @@ This downloads:
 
 The binary lives at `~/Basir/TTS/match_tts_infer/`. It needs cmake, a C++17 compiler, and ONNX Runtime.
 
-#### 3a. Install build tools (required)
+#### 3a. Install build tools and libraries (required)
 
 ```bash
-sudo apt-get install -y cmake build-essential
+sudo apt-get install -y cmake build-essential libespeak-ng-dev libicu-dev
 ```
 
 #### 3b. Install ONNX Runtime (required)
