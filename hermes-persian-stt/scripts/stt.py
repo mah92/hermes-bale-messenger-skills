@@ -33,13 +33,26 @@ if os.path.isdir(_local_bin):
 # Global recognizer singleton
 _recognizer = None
 
+def _download_models() -> None:
+    """Auto-download the STT model if it's missing."""
+    script = os.path.join(_SCRIPT_DIR, "download_models.py")
+    print("Model not found — downloading (one-time ~126 MB)...", file=sys.stderr)
+    try:
+        subprocess.run([sys.executable, script, "--model-only"],
+                       capture_output=True, timeout=600)
+    except Exception as e:
+        print(f"Auto-download failed: {e}", file=sys.stderr)
+
+
 def get_recognizer():
     global _recognizer
     if _recognizer is None:
         if not os.path.exists(MODEL_PATH):
-            print(f"Error: Model not found at {MODEL_PATH}", file=sys.stderr)
-            print(f"Run: python3 {_SCRIPT_DIR}/download_models.py", file=sys.stderr)
-            sys.exit(1)
+            _download_models()
+            if not os.path.exists(MODEL_PATH):
+                print(f"Error: Model not found at {MODEL_PATH}", file=sys.stderr)
+                print(f"Run: python3 {_SCRIPT_DIR}/download_models.py", file=sys.stderr)
+                sys.exit(1)
         _recognizer = sherpa_onnx.OfflineRecognizer.from_nemo_ctc(
             model=MODEL_PATH,
             tokens=TOKENS_PATH,
