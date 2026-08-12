@@ -24,55 +24,38 @@ is ~200ms — 12x faster than loading from scratch each time.
 npx skills add mah92/hermes-persian-skills --skill hermes-persian-tts
 ```
 
-Or manually:
-
-```bash
-cd ~/.hermes/skills/
-git clone https://github.com/mah92/hermes-persian-skills.git
-```
-
 ### 2. Download models
 
 ```bash
-python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-tts/scripts/download_models.py
+python3 ~/.hermes/skills/hermes-persian-tts/scripts/download_models.py
 ```
 
 This downloads:
 - Matcha-TTS ONNX model (~72 MB) — Zahra voice, 22050 Hz
-- Vocos universal vocoder (~30 MB)
+- Vocos universal vocoder (k2-fsa vocos-22khz-univ, ~51 MB)
 - Token map file
 
 ### 3. Build the C++ binary
 
-#### 3a. Clone the repo (if not already done)
+#### 3a. Clone the repo
 
 ```bash
-mkdir -p ~/Basir/TTS
-cd ~/Basir/TTS
 git clone --recurse-submodules https://github.com/mah92/matcha_tts_infer.git
 ```
 
 This clones `matcha_tts_infer` + the `NormalizeText` submodule (ezafe, hazm, shakkelha, homograph, espeak-ng).
 
-#### 3b. Install build tools and libraries (required)
+#### 3b. Install build tools and libraries
 
 ```bash
 sudo apt-get install -y cmake build-essential libespeak-ng-dev libicu-dev
 ```
 
-#### 3c. Install ONNX Runtime (required)
-
-The binary links against ONNX Runtime for model inference.
-
-Check if already installed:
+#### 3c. Install ONNX Runtime
 
 ```bash
 ldconfig -p | grep libonnxruntime
-```
-
-If not found, download and install ONNX Runtime 1.20.0:
-
-```bash
+# If not found:
 wget https://github.com/microsoft/onnxruntime/releases/download/v1.20.0/onnxruntime-linux-x64-1.20.0.tgz
 tar xzf onnxruntime-linux-x64-1.20.0.tgz
 sudo cp -r onnxruntime-linux-x64-1.20.0/lib/* /usr/local/lib/
@@ -80,46 +63,32 @@ sudo cp -r onnxruntime-linux-x64-1.20.0/include/* /usr/local/include/
 sudo ldconfig
 ```
 
-#### 3d. Build MatchaTTSInfer
+#### 3d. Build
 
 ```bash
-cd ~/Basir/TTS/matcha_tts_infer
-mkdir -p build && cd build
-cmake ..
-make -j$(nproc)
+cd matcha_tts_infer && mkdir -p build && cd build
+cmake .. && make -j$(nproc)
 ```
 
-#### 3e. Verify the build
+#### 3e. Verify
 
 ```bash
-ls -la ~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer
+ls -la build/MatchaTTSInfer   # ~250 KB binary
 ```
 
-If the binary exists (~250 KB), it's ready.
+### 4. Configure environment
 
-### 4. Start the daemon
-
-The daemon MUST run from the `NormalizeText/` directory (assets are at `./assets/`):
+`tts.py` reads the binary and espeak-ng data locations from environment
+variables (no hardcoded machine-specific paths):
 
 ```bash
-cd ~/Basir/TTS/matcha_tts_infer/NormalizeText
-~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &
+export MATCHA_TTS_BIN=/path/to/matcha_tts_infer/build/MatchaTTSInfer
+export ESPEAK_DATA=/path/to/espeak-ng-data    # optional
 ```
 
-Wait ~2.5 seconds for models to load, then verify:
-
-```bash
-echo '{"text":"سلام","output":"/tmp/test.wav"}' | nc -U /tmp/tts_infer.sock
-```
-
-Should return JSON with `"status":"ok"` and a WAV path.
-
-**Auto-start:** Add to crontab or systemd to survive reboots:
-
-```bash
-# Crontab
-@reboot cd ~/Basir/TTS/matcha_tts_infer/NormalizeText && ~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &
-```
+`tts.py` auto-starts the daemon on first use, so there is no separate
+daemon-management step. The daemon is started from the `NormalizeText/`
+directory automatically (so `./assets/` resolves correctly).
 
 ### 5. Configure Hermes
 
@@ -131,7 +100,7 @@ tts:
   providers:
     matcha:
       type: command
-      command: python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-tts/scripts/tts.py {input_path} {output_path}
+      command: python3 ~/.hermes/skills/hermes-persian-tts/scripts/tts.py --speed 1.5 {input_path} {output_path}
       output_format: ogg
       timeout: 60
       voice_compatible: true
@@ -152,7 +121,7 @@ to OGG OPUS, and passes it back to Hermes.
 The daemon loads all models once at startup:
 - Token map (158 tokens)
 - Matcha-TTS ONNX (~72 MB)
-- Vocos vocoder ONNX (~30 MB)
+- Vocos vocoder ONNX (~51 MB, k2-fsa vocos-22khz-univ with ISTFT reconstruction)
 - NormalizeText pipeline (ezafe, homograph, shakkelha, hazm, espeak-ng)
 
 Subsequent requests skip all loading — just normalize + synthesize.
@@ -167,45 +136,22 @@ Subsequent requests skip all loading — just normalize + synthesize.
 | MatchaTTS inference | ~35ms |
 | Vocos inference | ~10ms |
 | NormalizeText (cached) | ~140ms |
-| RTF | ~0.15 on CPU (4 threads) |
 
 ## Files
 
 | File | Purpose |
 |------|---------|
 | `scripts/tts.py` | TTS command provider — talks to daemon, converts to OGG |
-| `~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer` | C++ binary (built separately) |
+| `scripts/download_models.py` | Download models from HuggingFace |
+| `$MATCHA_TTS_BIN` | C++ binary (built separately) |
 | `/tmp/tts_infer.sock` | Daemon socket (created at startup, cleaned on stop) |
-
-## Managing the Daemon
-
-```bash
-# Start (from NormalizeText directory!)
-cd ~/Basir/TTS/matcha_tts_infer/NormalizeText
-~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &
-
-# Check if running
-[ -S /tmp/tts_infer.sock ] && echo "running" || echo "stopped"
-
-# Test
-echo '{"text":"سلام","output":"/tmp/test.wav"}' | nc -U /tmp/tts_infer.sock
-
-# Stop gracefully
-cd ~/Basir/TTS/matcha_tts_infer/NormalizeText
-~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --stop
-
-# Force kill
-pkill -f "MatchaTTSInfer --daemon"
-rm -f /tmp/tts_infer.sock
-```
 
 ## Common Pitfalls
 
-1. **Socket not found.** Daemon not running. Start it with `--daemon` from the `NormalizeText/` directory.
-2. **Failed to load SentencePiece model.** Binary must run from `NormalizeText/` directory so `./assets/` resolves correctly. Always `cd ~/Basir/TTS/matcha_tts_infer/NormalizeText` before starting daemon.
-3. **Daemon dies after first request.** SIGPIPE when client disconnects mid-request. The daemon now ignores SIGPIPE — rebuild if using an older version.
-4. **Daemon dies on health check.** Don't use `nc -z` or quick-connect tests — each connect consumes one `accept()` slot. Use `test -S /tmp/tts_infer.sock` to check if running, or `echo '{"command":"stop"}' | nc -U` for graceful shutdown.
-5. **Empty text passed to tts.py.** Hermes writes text to `{input_path}`. The script reads it with UTF-8 encoding. Non-Persian text or empty files produce silent audio — check the input file content.
-6. **OPUS 48kHz metadata.** The OGG output may show 48000 Hz in ffprobe — this is normal OPUS internal rate. Audio decodes correctly at the original sample rate.
-7. **Stale socket after crash.** If daemon crashes, the socket file remains. Delete it before restarting: `rm -f /tmp/tts_infer.sock`.
-8. **Model paths changed.** Update paths in `tts.py` (MODEL_DIR, MATCHA_BIN, etc.) or pass explicit `--matcha-model`, `--vocoder-model` etc. to the daemon at startup.
+1. **`MATCHA_TTS_BIN` not set.** tts.py needs the path to the MatchaTTSInfer binary. Set it in `~/.hermes/.env` or the shell environment.
+2. **Failed to load SentencePiece model.** The daemon must run from the `NormalizeText/` directory so `./assets/` resolves. tts.py handles this automatically via `cwd`, but a manually-started daemon must `cd` there first.
+3. **Daemon dies after first request.** SIGPIPE when client disconnects mid-request. The daemon ignores SIGPIPE — rebuild if using an older version.
+4. **Stale socket after crash.** If daemon crashes, `/tmp/tts_infer.sock` remains. Delete it before restarting: `rm -f /tmp/tts_infer.sock`.
+5. **Vocos model incompatible.** Use the k2-fsa `vocos-22khz-univ.onnx` (mels → mag/x/y). The binary reconstructs the waveform via ISTFT.
+6. **Empty text passed to tts.py.** Hermes writes text to `{input_path}`. The script reads it with UTF-8 encoding.
+7. **OPUS 48kHz metadata.** OGG output may show 48000 Hz in ffprobe — normal OPUS internal rate.

@@ -23,28 +23,31 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_DIR = os.path.dirname(SCRIPT_DIR)
 MODELS_DIR = os.path.join(SKILL_DIR, "models")
 
-BIN = os.environ.get(
-    "MATCHA_TTS_BIN",
-    os.path.expanduser("~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer"),
-)
+# Paths come from environment — no hardcoded machine-specific locations.
+BIN = os.environ.get("MATCHA_TTS_BIN", "")
+ESPEAK_DATA = os.environ.get("ESPEAK_DATA", "")
 
 # Model paths — passed explicitly to the binary (no hardcoded defaults in C++).
 MATCHA_MODEL = os.path.join(MODELS_DIR, "matcha-fa_en-zahra-22050-5.onnx")
 VOCODER_MODEL = os.path.join(MODELS_DIR, "vocos22.onnx")
 TOKENS_FILE = os.path.join(MODELS_DIR, "tokens_sherpa_with_fa.txt")
-ESPEAK_DATA = os.path.expanduser("~/Basir/TTS/Piper/piper_linux_x86_64/piper/espeak-ng-data")
 
 
 def _start_daemon() -> bool:
     """Start the MatchaTTSInfer daemon with explicit model paths."""
+    if not BIN:
+        print("Error: MATCHA_TTS_BIN is not set. Point it to the MatchaTTSInfer binary.",
+              file=sys.stderr)
+        return False
     norm_dir = os.path.join(os.path.dirname(BIN), "..", "NormalizeText")
     cmd = [
         BIN, "--daemon",
         "--matcha-model", MATCHA_MODEL,
         "--vocoder-model", VOCODER_MODEL,
         "--tokens", TOKENS_FILE,
-        "--espeak-data", ESPEAK_DATA,
     ]
+    if ESPEAK_DATA:
+        cmd += ["--espeak-data", ESPEAK_DATA]
     try:
         subprocess.Popen(
             cmd,
