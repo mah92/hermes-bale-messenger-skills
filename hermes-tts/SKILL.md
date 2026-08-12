@@ -44,7 +44,35 @@ This downloads:
 
 ### 3. Build the C++ binary
 
-The binary lives at `~/Basir/TTS/match_tts_infer/`. If not yet built:
+The binary lives at `~/Basir/TTS/match_tts_infer/`. It needs cmake, a C++17 compiler, and ONNX Runtime.
+
+#### 3a. Install build tools (required)
+
+```bash
+sudo apt-get install -y cmake build-essential
+```
+
+#### 3b. Install ONNX Runtime (required)
+
+The binary links against ONNX Runtime for model inference.
+
+Check if already installed:
+
+```bash
+ldconfig -p | grep libonnxruntime
+```
+
+If not found, download and install ONNX Runtime 1.20.0:
+
+```bash
+wget https://github.com/microsoft/onnxruntime/releases/download/v1.20.0/onnxruntime-linux-x64-1.20.0.tgz
+tar xzf onnxruntime-linux-x64-1.20.0.tgz
+sudo cp -r onnxruntime-linux-x64-1.20.0/lib/* /usr/local/lib/
+sudo cp -r onnxruntime-linux-x64-1.20.0/include/* /usr/local/include/
+sudo ldconfig
+```
+
+#### 3c. Build MatchaTTSInfer
 
 ```bash
 cd ~/Basir/TTS/match_tts_infer
@@ -53,11 +81,13 @@ cmake ..
 make -j$(nproc)
 ```
 
-Verify:
+#### 3d. Verify the build
 
 ```bash
 ls -la ~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer
 ```
+
+If the binary exists (~250 KB), it's ready.
 
 ### 4. Start the daemon
 
