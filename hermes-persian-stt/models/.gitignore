@@ -1,4 +1,4 @@
-# Prevent committing large model files (~126MB shenava-koochik, ~9MB hush ONNX models)
+# Prevent committing the large speech model (~126MB shenava-koochik).
+# hush_cpp (denoiser source + ~9MB ONNX models) is bundled in the repo.
 shenava-koochik/
-hush_cpp/
 

@@ -38,9 +38,8 @@ git clone https://github.com/mah92/hermes-persian-skills.git
 python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/scripts/download_models.py
 ```
 
-This downloads:
-- Shenava-Koochik v1.0 int8 ONNX model (~126 MB)
-- hush_cpp denoiser source
+This downloads the Shenava-Koochik model (~126 MB). The hush_cpp denoiser
+(source + ONNX models) is already bundled in the repo under `models/hush_cpp/`.
 
 #### ⚠️ Verify the download — do NOT skip this step
 
@@ -75,7 +74,7 @@ sudo apt-get install ffmpeg
 ### 4. Build Hush denoiser (strongly recommended)
 
 Hush denoises voice audio before transcription — cleaner input means better accuracy.
-The source is downloaded by `download_models.py`, so run that first.
+The source is bundled in the repo under `models/hush_cpp/` (no separate download).
 
 **Try hard to build this.** Install any missing dependencies (cmake, ONNX Runtime) and
 retry — do NOT give up at the first error. Only skip if you've exhausted every option.
@@ -156,7 +155,7 @@ audio file → ffmpeg → WAV 16kHz mono → hush_enhance_onnx (denoise) → cle
 ```
 
 Graceful degradation: if hush binary is missing or build fails, denoise step is skipped.
-Models are downloaded via `download_models.py` — no submodules needed.
+The speech model is downloaded via `download_models.py`; hush_cpp is bundled — no submodules needed.
 
 ## Dependencies
 
@@ -166,7 +165,7 @@ Models are downloaded via `download_models.py` — no submodules needed.
 | Python: soundfile, numpy, scipy | ✅ | Install via `~/.hermes/hermes-agent/venv/bin/pip` |
 | System: ffmpeg | ✅ | `sudo apt-get install ffmpeg` |
 | Shenava-Koochik model | ✅ | Downloaded by `download_models.py` (~126 MB) |
-| hush_cpp | — | Optional denoiser. Downloaded by `download_models.py` |
+| hush_cpp | — | Optional denoiser. Bundled in repo (`models/hush_cpp/`) |
 | ONNX Runtime | — | Required only if building hush_cpp |
 
 ## Files
@@ -174,9 +173,9 @@ Models are downloaded via `download_models.py` — no submodules needed.
 | File | Purpose |
 |------|---------|
 | `scripts/stt.py` | Main transcription script |
-| `scripts/download_models.py` | Download model + hush_cpp from HF and GitHub |
+| `scripts/download_models.py` | Download Shenava model from HF |
 | `models/shenava-koochik/` | Shenava-Koochik v1.0 int8 model (downloaded) |
-| `models/hush_cpp/` | Hush-CPP denoiser source (downloaded, optional) |
+| `models/hush_cpp/` | Hush-CPP denoiser source + ONNX models (bundled, optional) |
 
 ## Model Info
 
@@ -208,7 +207,7 @@ To test from the terminal:
    - Model files downloaded (`python3 scripts/download_models.py`)
 2. **ModuleNotFoundError: sherpa_onnx.** Install into Hermes venv: `~/.hermes/hermes-agent/venv/bin/pip install sherpa-onnx soundfile numpy scipy`
 3. **ffmpeg not found.** Install: `sudo apt-get install ffmpeg`
-4. **Model not downloaded.** Run `python3 scripts/download_models.py` to download model (~126 MB) + hush_cpp. **Always verify files exist after download** — the script may report "Done!" even when files failed to write. Check: `ls -lh models/shenava-koochik/model.int8.onnx` (must be ~126MB).
+4. **Model not downloaded.** Run `python3 scripts/download_models.py` to download the model (~126 MB). **Always verify files exist after download** — the script may report "Done!" even when files failed to write. Check: `ls -lh models/shenava-koochik/model.int8.onnx` (must be ~126MB).
 5. **Large voice files skipped.** Bale plugin skips audio > `BALE_MAX_VOICE_DURATION` seconds (default 30). Set to 0 in `.env` to disable limit.
 6. **Hush denoiser missing.** Set `STT_HUSH_BINARY` env var to custom path. But you should BUILD it instead — see step 4.
 7. **Using system python3 instead of Hermes venv.** The STT provider runs inside Hermes, so sherpa-onnx must be installed in `~/.hermes/hermes-agent/venv/`, not system-wide. Always use `~/.hermes/hermes-agent/venv/bin/pip` for installs and `~/.hermes/hermes-agent/venv/bin/python` for testing.

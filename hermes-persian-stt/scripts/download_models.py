@@ -4,7 +4,7 @@ Download model files for hermes-persian-stt.
 
 Downloads:
   - Shenava-Koochik v1.0 int8 ONNX model + tokens (from HuggingFace, ~126 MB)
-  - hush_cpp denoiser source (from GitHub, optional)
+  - hush_cpp denoiser source + ONNX models (bundled in repo; GitHub is fallback only)
 
 Usage:
   python3 download_models.py              # download everything
@@ -26,6 +26,8 @@ MODEL_FILES = [
     ("tokens.txt",        "https://huggingface.co/mah92/sherpa-onnx-nemo-ctc-fa-shenava-koochik-v1.0-non-streaming-int8-2026-06-26/resolve/main/tokens.txt"),
 ]
 
+# Fallback only — hush_cpp is bundled in the repo under models/hush_cpp/.
+# This URL is used only if the bundle is missing (e.g. partial install).
 HUSH_URL = "https://github.com/mah92/hush_cpp/archive/refs/heads/developing.tar.gz"
 
 CHUNK = 1024 * 1024  # 1 MB
@@ -57,9 +59,14 @@ def download_file(url: str, dest: Path, label: str):
 
 
 def download_hush():
-    """Download and extract hush_cpp source from GitHub."""
+    """hush_cpp is bundled in the repo (source + ONNX models under models/hush_cpp/).
+    Only fetch from the standalone repo as a fallback if the bundle is missing."""
     dest_dir = HUSH_DIR
     marker = dest_dir / ".downloaded"
+
+    if (dest_dir / "CMakeLists.txt").exists():
+        print("  hush_cpp: bundled in repo, skipping download")
+        return
 
     if marker.exists():
         print(f"  hush_cpp: already downloaded, skipping")
@@ -115,7 +122,7 @@ def main():
         download_file(url, MODEL_DIR / filename, filename)
 
     if not args.model_only:
-        print("\nDownloading hush_cpp denoiser (optional):")
+        print("\nhush_cpp denoiser (bundled, optional):")
         download_hush()
 
     print("\nDone! Models are in:", SKILL_DIR / "models")
