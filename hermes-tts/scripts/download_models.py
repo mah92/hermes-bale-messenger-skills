@@ -32,7 +32,7 @@ MODEL_FILES = [
     ),
     (
         "vocos22.onnx",
-        "https://huggingface.co/mah92/vocos-universal/resolve/main/vocos22.onnx",
+        "https://huggingface.co/k2-fsa/sherpa-onnx-models/resolve/main/vocoder-models/vocos-22khz-univ.onnx",
         "Vocos universal vocoder (any sample rate)",
     ),
     (
