@@ -7,7 +7,7 @@ license: MIT
 metadata:
   hermes:
     tags: [tts, persian, matcha, vocos, daemon, zahra]
-    related_skills: [hermes-bale-messenger, matcha-tts]
+    related_skills: [hermes-bale-messenger]
 ---
 
 # MatchaTTS Daemon — Fast Persian TTS
