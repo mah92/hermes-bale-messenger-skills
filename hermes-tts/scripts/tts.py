@@ -22,7 +22,7 @@ def _send_request(text: str, output_wav: str, speed: float = 1.0) -> dict:
         "text": text,
         "output": output_wav,
         "speed": speed,
-    })
+    }, ensure_ascii=False)
 
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.settimeout(30)
