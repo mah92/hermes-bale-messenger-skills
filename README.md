@@ -3,7 +3,7 @@
 Bale (بله) messenger integration for Hermes Agent — Persian messenger support
 via the free Bot API.
 
-Two skills in one repo:
+Three skills in one repo:
 
 | Skill | Install | Purpose |
 |-------|---------|---------|
@@ -32,6 +32,8 @@ npx skills add mah92/hermes-bale-messenger-skills --skill hermes-matcha-tts
   Group chat support, typing indicators, user allowlisting, cron delivery.
 - **hermes-bale-stt:** Transcribes Persian voice messages.
   Shenava-Koochik v1.0 (114M params, WER 7.49%), optional hush_cpp denoiser.
+- **hermes-matcha-tts:** Synthesizes Persian speech via MatchaTTS C++ daemon.
+  Zahra voice (22050 Hz), vocos22 vocoder, ~200ms per request after daemon warm-up.
 
 ## Requirements
 
