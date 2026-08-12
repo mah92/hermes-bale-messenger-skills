@@ -19,6 +19,45 @@ SOCKET_PATH = "/tmp/tts_infer.sock"
 MAX_RETRIES = 3  # try 3 times total
 DEFAULT_SPEED = 1.5
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SKILL_DIR = os.path.dirname(SCRIPT_DIR)
+MODELS_DIR = os.path.join(SKILL_DIR, "models")
+
+BIN = os.environ.get(
+    "MATCHA_TTS_BIN",
+    os.path.expanduser("~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer"),
+)
+
+# Model paths — passed explicitly to the binary (no hardcoded defaults in C++).
+MATCHA_MODEL = os.path.join(MODELS_DIR, "matcha-fa_en-zahra-22050-5.onnx")
+VOCODER_MODEL = os.path.join(MODELS_DIR, "vocos22.onnx")
+TOKENS_FILE = os.path.join(MODELS_DIR, "tokens_sherpa_with_fa.txt")
+ESPEAK_DATA = os.path.expanduser("~/Basir/TTS/Piper/piper_linux_x86_64/piper/espeak-ng-data")
+
+
+def _start_daemon() -> bool:
+    """Start the MatchaTTSInfer daemon with explicit model paths."""
+    norm_dir = os.path.join(os.path.dirname(BIN), "..", "NormalizeText")
+    cmd = [
+        BIN, "--daemon",
+        "--matcha-model", MATCHA_MODEL,
+        "--vocoder-model", VOCODER_MODEL,
+        "--tokens", TOKENS_FILE,
+        "--espeak-data", ESPEAK_DATA,
+    ]
+    try:
+        subprocess.Popen(
+            cmd,
+            cwd=norm_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        return True
+    except Exception as e:
+        print(f"Error: failed to start daemon: {e}", file=sys.stderr)
+        return False
+
 
 def _send_request(text: str, output_wav: str, speed: float = 1.5) -> dict:
     """Send a synthesis request to the daemon. Retries up to MAX_RETRIES times."""
@@ -99,13 +138,18 @@ def main():
     if not text:
         sys.exit(1)
 
-    # Check if daemon is running
+    # Start daemon if not running
     if not os.path.exists(SOCKET_PATH):
-        print("Error: TTS daemon not running", file=sys.stderr)
-        print(f"Start it: cd ~/Basir/TTS/matcha_tts_infer/NormalizeText && "
-              f"~/Basir/TTS/matcha_tts_infer/build/MatchaTTSInfer --daemon &",
-              file=sys.stderr)
-        sys.exit(1)
+        if not _start_daemon():
+            sys.exit(1)
+        # Wait for daemon to be ready (up to 15s for model loading)
+        for _ in range(150):
+            if os.path.exists(SOCKET_PATH):
+                break
+            time.sleep(0.1)
+        if not os.path.exists(SOCKET_PATH):
+            print("Error: daemon did not start within 15s", file=sys.stderr)
+            sys.exit(1)
 
     # Synthesize via daemon
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
