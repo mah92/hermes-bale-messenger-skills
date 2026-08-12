@@ -1,5 +1,5 @@
 ---
-name: hermes-tts
+name: hermes-persian-tts
 description: "Persian TTS via MatchaTTS C++ daemon — general-purpose, not Bale-specific. Loads models once (2.5s), then ~200ms per request."
 version: 1.0.0
 author: علی محمودی
@@ -21,7 +21,7 @@ is ~200ms — 12x faster than loading from scratch each time.
 ### 1. Install the skill
 
 ```bash
-npx skills add mah92/hermes-persian-skills --skill hermes-tts
+npx skills add mah92/hermes-persian-skills --skill hermes-persian-tts
 ```
 
 Or manually:
@@ -34,7 +34,7 @@ git clone https://github.com/mah92/hermes-persian-skills.git
 ### 2. Download models
 
 ```bash
-python3 ~/.hermes/skills/hermes-persian-skills/hermes-tts/scripts/download_models.py
+python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-tts/scripts/download_models.py
 ```
 
 This downloads:
@@ -131,7 +131,7 @@ tts:
   providers:
     matcha:
       type: command
-      command: python3 ~/.hermes/skills/hermes-persian-skills/hermes-tts/scripts/tts.py {input_path} {output_path}
+      command: python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-tts/scripts/tts.py {input_path} {output_path}
       output_format: ogg
       timeout: 60
       voice_compatible: true

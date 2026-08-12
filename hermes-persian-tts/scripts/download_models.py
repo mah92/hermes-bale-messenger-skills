@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Download model files for hermes-tts.
+Download model files for hermes-persian-tts.
 
 Downloads:
   - Matcha-TTS ONNX model (Zahra voice, ~72 MB)
@@ -17,7 +17,7 @@ from urllib.request import urlopen, Request
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-SKILL_DIR = SCRIPT_DIR.parent  # hermes-tts/
+SKILL_DIR = SCRIPT_DIR.parent  # hermes-persian-tts/
 MODEL_DIR = SKILL_DIR / "models"
 
 # ── Model files ──────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ def download_file(url: str, dest: Path, label: str):
         return
 
     print(f"  {label}: downloading...", end=" ", flush=True)
-    req = Request(url, headers={"User-Agent": "hermes-tts/1.0"})
+    req = Request(url, headers={"User-Agent": "hermes-persian-tts/1.0"})
 
     try:
         with urlopen(req, timeout=120) as resp:
@@ -81,7 +81,7 @@ def download_file(url: str, dest: Path, label: str):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download models for hermes-tts")
+    parser = argparse.ArgumentParser(description="Download models for hermes-persian-tts")
     parser.add_argument("--force", action="store_true",
                         help="Re-download even if files exist")
     args = parser.parse_args()

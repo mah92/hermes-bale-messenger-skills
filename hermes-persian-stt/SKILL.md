@@ -1,5 +1,5 @@
 ---
-name: hermes-stt
+name: hermes-persian-stt
 description: "Add Persian speech-to-text to Hermes. Transcribes voice messages from any platform (Bale, Telegram, etc.) via Shenava-Koochik."
 version: 1.2.1
 author: علی محمودی
@@ -35,7 +35,7 @@ git clone https://github.com/mah92/hermes-persian-skills.git
 ### 2. Download models
 
 ```bash
-python3 ~/.hermes/skills/hermes-persian-skills/hermes-stt/scripts/download_models.py
+python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/scripts/download_models.py
 ```
 
 This downloads:
@@ -49,16 +49,16 @@ Always verify:
 
 ```bash
 # Must show ~126MB file, NOT 134 bytes (LFS pointer) and NOT missing
-ls -lh ~/.hermes/skills/hermes-persian-skills/hermes-stt/models/shenava-koochik/model.int8.onnx
+ls -lh ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/models/shenava-koochik/model.int8.onnx
 
 # Must show hush_cpp source files (CMakeLists.txt, src/, onnx/)
-ls ~/.hermes/skills/hermes-persian-skills/hermes-stt/models/hush_cpp/CMakeLists.txt
+ls ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/models/hush_cpp/CMakeLists.txt
 ```
 
 If files are missing, re-run with `--force`:
 
 ```bash
-python3 ~/.hermes/skills/hermes-persian-skills/hermes-stt/scripts/download_models.py --force
+python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/scripts/download_models.py --force
 ```
 
 ### 3. Install dependencies
@@ -107,7 +107,7 @@ sudo ldconfig
 #### 4c. Build hush_cpp
 
 ```bash
-cd ~/.hermes/skills/hermes-persian-skills/hermes-stt/models/hush_cpp
+cd ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/models/hush_cpp
 mkdir -p build && cd build
 cmake .. \
   -DONNX_RUNTIME_LIB=/usr/local/lib/libonnxruntime.so \
@@ -135,7 +135,7 @@ stt:
   providers:
     shenava:
       type: command
-      command: ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-persian-skills/hermes-stt/scripts/stt.py --quiet {input_path}
+      command: ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/scripts/stt.py --quiet {input_path}
 ```
 
 Then restart the gateway.
@@ -196,7 +196,7 @@ transcribed text, STT is working.
 To test from the terminal:
 
 ```bash
-~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-persian-skills/hermes-stt/scripts/stt.py test_voice.ogg
+~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-persian-skills/hermes-persian-stt/scripts/stt.py test_voice.ogg
 ```
 
 ## Common Pitfalls
