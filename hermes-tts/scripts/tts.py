@@ -18,7 +18,7 @@ SOCKET_PATH = "/tmp/tts_infer.sock"
 MAX_RETRIES = 3  # try 3 times total
 
 
-def _send_request(text: str, output_wav: str, speed: float = 1.0) -> dict:
+def _send_request(text: str, output_wav: str, speed: float = 1.5) -> dict:
     """Send a synthesis request to the daemon. Retries up to MAX_RETRIES times."""
     request = json.dumps({
         "text": text,
