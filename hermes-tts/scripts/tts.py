@@ -13,9 +13,11 @@ import socket
 import subprocess
 import tempfile
 import time
+import argparse
 
 SOCKET_PATH = "/tmp/tts_infer.sock"
 MAX_RETRIES = 3  # try 3 times total
+DEFAULT_SPEED = 1.5
 
 
 def _send_request(text: str, output_wav: str, speed: float = 1.5) -> dict:
@@ -81,10 +83,18 @@ def _wav_to_ogg(wav_path: str, ogg_path: str) -> None:
 
 
 def main():
-    text_path = sys.argv[1]
-    output_path = sys.argv[2]
+    parser = argparse.ArgumentParser(description="Persian TTS via MatchaTTS daemon")
+    parser.add_argument("--speed", type=float, default=DEFAULT_SPEED,
+                        help=f"Speaking speed multiplier (default: {DEFAULT_SPEED})")
+    parser.add_argument("input_path", nargs="?", help="Text input file path")
+    parser.add_argument("output_path", nargs="?", help="OGG output file path")
+    args = parser.parse_args()
 
-    with open(text_path, encoding="utf-8") as f:
+    if not args.input_path or not args.output_path:
+        parser.print_help()
+        sys.exit(1)
+
+    with open(args.input_path, encoding="utf-8") as f:
         text = f.read().strip()
     if not text:
         sys.exit(1)
@@ -102,7 +112,7 @@ def main():
         tmp_wav = f.name
 
     try:
-        result = _send_request(text, tmp_wav)
+        result = _send_request(text, tmp_wav, speed=args.speed)
         if result.get("status") != "ok":
             print(f"Error: {result.get('message', 'unknown')}", file=sys.stderr)
             sys.exit(1)
@@ -113,7 +123,7 @@ def main():
             sys.exit(1)
 
         # Convert to OGG
-        _wav_to_ogg(wav_output, output_path)
+        _wav_to_ogg(wav_output, args.output_path)
     finally:
         try:
             os.unlink(tmp_wav)
