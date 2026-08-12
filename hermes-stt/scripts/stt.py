@@ -200,6 +200,11 @@ def main():
         sys.exit(1)
 
     text = transcribe(args.audio, verbose=not args.quiet)
+    if args.quiet and not text.strip():
+        # Hermes command-provider mode: must produce non-empty output.
+        # Write transcript.txt in CWD so Hermes picks it up.
+        with open("transcript.txt", "w", encoding="utf-8") as f:
+            f.write("")
     print(text)
 
 if __name__ == "__main__":
