@@ -54,3 +54,19 @@ python3 ~/.hermes/skills/hermes-persian-skills/hermes-persian-tts/scripts/downlo
 - Shenava-Koochik STT model: [HuggingFace](https://huggingface.co/mah92/sherpa-onnx-nemo-ctc-fa-shenava-koochik-v1.0-non-streaming-int8-2026-06-26)
 - Zahra Matcha-TTS model: [HuggingFace](https://huggingface.co/mah92/Zahra-FA_EN-22KHz-Matcha-TTS-Model)
 - Vocos vocoder: [HuggingFace](https://huggingface.co/k2-fsa/sherpa-onnx-models)
+
+## Citation
+
+If you use this work, please cite the original paper:
+
+```bibtex
+@misc{fetrat2025servicetts,
+      title={Beyond Unified Models: A Service-Oriented Approach to Low Latency, Context Aware Phonemization for Real Time TTS},
+      author={Mahta Fetrat and Donya Navabi and Zahra Dehghanian and Morteza Abolghasemi and Hamid R. Rabiee},
+      year={2025},
+      eprint={2512.08006},
+      archivePrefix={arXiv},
+      primaryClass={cs.SD},
+      url={https://arxiv.org/abs/2512.08006},
+}
+```
