@@ -15,14 +15,14 @@ Three skills in one repo:
 
 ```bash
 # Messenger plugin
-npx skills add mah92/hermes-bale-messenger-skills --skill hermes-bale-messenger
+npx skills add mah92/hermes-persian-skills --skill hermes-bale-messenger
 
 # Persian STT
-npx skills add mah92/hermes-bale-messenger-skills --skill hermes-stt
-python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/scripts/download_models.py
+npx skills add mah92/hermes-persian-skills --skill hermes-stt
+python3 ~/.hermes/skills/hermes-persian-skills/hermes-stt/scripts/download_models.py
 
 # Persian TTS
-npx skills add mah92/hermes-bale-messenger-skills --skill hermes-tts
+npx skills add mah92/hermes-persian-skills --skill hermes-tts
 # Then start the daemon: see hermes-tts SKILL.md
 ```
 
