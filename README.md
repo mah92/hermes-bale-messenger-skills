@@ -1,9 +1,13 @@
-﷽
+<div align="center">
 
-# Hermes Persian Skills
+# ﷽
 
-Persian language skills for Hermes Agent — speech-to-text, text-to-speech, and
-the Bale (بله) messenger platform adapter. One repo, three skills.
+---
+
+**Hermes Persian Skills** — Persian speech-to-text, text-to-speech, and the
+Bale (بله) messenger platform adapter for Hermes Agent. One repo, three skills.
+
+</div>
 
 | Skill | Install | Purpose |
 |-------|---------|---------|
