@@ -1,6 +1,6 @@
 ---
-name: hermes-matcha-tts
-description: "Persian TTS via MatchaTTS C++ daemon. Loads models once (2.5s), then ~200ms per request."
+name: hermes-tts
+description: "Persian TTS via MatchaTTS C++ daemon — general-purpose, not Bale-specific. Loads models once (2.5s), then ~200ms per request."
 version: 1.0.0
 author: علی محمودی
 license: MIT
@@ -21,7 +21,7 @@ is ~200ms — 12x faster than loading from scratch each time.
 ### 1. Install the skill
 
 ```bash
-npx skills add mah92/hermes-bale-messenger-skills --skill hermes-matcha-tts
+npx skills add mah92/hermes-bale-messenger-skills --skill hermes-tts
 ```
 
 Or manually:
@@ -31,7 +31,18 @@ cd ~/.hermes/skills/
 git clone https://github.com/mah92/hermes-bale-messenger-skills.git
 ```
 
-### 2. Build the C++ binary
+### 2. Download models
+
+```bash
+python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-tts/scripts/download_models.py
+```
+
+This downloads:
+- Matcha-TTS ONNX model (~72 MB) — Zahra voice, 22050 Hz
+- Vocos universal vocoder (~30 MB)
+- Token map file
+
+### 3. Build the C++ binary
 
 The binary lives at `~/Basir/TTS/match_tts_infer/`. If not yet built:
 
@@ -48,7 +59,7 @@ Verify:
 ls -la ~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer
 ```
 
-### 3. Start the daemon
+### 4. Start the daemon
 
 The daemon MUST run from the `NormalizeText/` directory (assets are at `./assets/`):
 
@@ -72,7 +83,7 @@ Should return JSON with `"status":"ok"` and a WAV path.
 @reboot cd ~/Basir/TTS/match_tts_infer/NormalizeText && ~/Basir/TTS/match_tts_infer/build/MatchaTTSInfer --daemon &
 ```
 
-### 4. Configure Hermes
+### 5. Configure Hermes
 
 Add to `~/.hermes/config.yaml`:
 
@@ -82,7 +93,7 @@ tts:
   providers:
     matcha:
       type: command
-      command: python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-matcha-tts/scripts/tts.py {input_path} {output_path}
+      command: python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-tts/scripts/tts.py {input_path} {output_path}
       output_format: ogg
       timeout: 60
       voice_compatible: true

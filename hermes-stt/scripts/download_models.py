@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Download model files for hermes-bale-stt.
+Download model files for hermes-stt.
 
 Downloads:
   - Shenava-Koochik v1.0 int8 ONNX model + tokens (from HuggingFace, ~126 MB)
@@ -17,7 +17,7 @@ from urllib.request import urlopen, Request
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-SKILL_DIR = SCRIPT_DIR.parent  # hermes-bale-stt/
+SKILL_DIR = SCRIPT_DIR.parent  # hermes-stt/
 MODEL_DIR = SKILL_DIR / "models" / "shenava-koochik"
 HUSH_DIR = SKILL_DIR / "models" / "hush_cpp"
 
@@ -38,7 +38,7 @@ def download_file(url: str, dest: Path, label: str):
         return
 
     print(f"  {label}: downloading...", end=" ", flush=True)
-    req = Request(url, headers={"User-Agent": "hermes-bale-stt/1.0"})
+    req = Request(url, headers={"User-Agent": "hermes-stt/1.0"})
     with urlopen(req) as resp:
         size = int(resp.headers.get("Content-Length", 0))
         downloaded = 0
@@ -67,7 +67,7 @@ def download_hush():
 
     print(f"  hush_cpp: downloading...", end=" ", flush=True)
 
-    req = Request(HUSH_URL, headers={"User-Agent": "hermes-bale-stt/1.0"})
+    req = Request(HUSH_URL, headers={"User-Agent": "hermes-stt/1.0"})
     with urlopen(req) as resp:
         with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tmp:
             shutil.copyfileobj(resp, tmp)
@@ -97,7 +97,7 @@ def download_hush():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download models for hermes-bale-stt")
+    parser = argparse.ArgumentParser(description="Download models for hermes-stt")
     parser.add_argument("--model-only", action="store_true", help="Only download speech model (skip hush_cpp)")
     parser.add_argument("--force", action="store_true", help="Re-download even if files exist")
     args = parser.parse_args()

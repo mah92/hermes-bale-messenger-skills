@@ -1,18 +1,19 @@
 ---
-name: hermes-bale-stt
-description: "Use when adding Persian STT to Bale on Hermes. Configures speech-to-text so voice messages are transcribed."
+name: hermes-stt
+description: "Add Persian speech-to-text to Hermes. Transcribes voice messages from any platform (Bale, Telegram, etc.) via Shenava-Koochik."
 version: 1.2.1
 author: علی محمودی
 license: MIT
 metadata:
   hermes:
-    tags: [bale, persian, stt, asr, voice, transcription, shenava, koochik]
+    tags: [persian, stt, asr, voice, transcription, shenava, koochik]
     related_skills: [hermes-bale-messenger]
 ---
 
-# Bale STT (Speech-to-Text)
+# STT (Speech-to-Text)
 
-Adds Persian voice transcription to Bale on Hermes. Without this, voice
+Adds Persian voice transcription to Hermes. Works with any platform that
+downloads audio files (Bale, Telegram, etc.). Without this, voice
 messages arrive as downloadable files with empty text. After setup, the
 agent hears and responds to voice messages.
 
@@ -34,7 +35,7 @@ git clone https://github.com/mah92/hermes-bale-messenger-skills.git
 ### 2. Download models
 
 ```bash
-python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/download_models.py
+python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/scripts/download_models.py
 ```
 
 This downloads:
@@ -48,16 +49,16 @@ Always verify:
 
 ```bash
 # Must show ~126MB file, NOT 134 bytes (LFS pointer) and NOT missing
-ls -lh ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/models/shenava-koochik/model.int8.onnx
+ls -lh ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/models/shenava-koochik/model.int8.onnx
 
 # Must show hush_cpp source files (CMakeLists.txt, src/, onnx/)
-ls ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/models/hush_cpp/CMakeLists.txt
+ls ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/models/hush_cpp/CMakeLists.txt
 ```
 
 If files are missing, re-run with `--force`:
 
 ```bash
-python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/download_models.py --force
+python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/scripts/download_models.py --force
 ```
 
 ### 3. Install dependencies
@@ -106,7 +107,7 @@ sudo ldconfig
 #### 4c. Build hush_cpp
 
 ```bash
-cd ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/models/hush_cpp
+cd ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/models/hush_cpp
 mkdir -p build && cd build
 cmake .. \
   -DONNX_RUNTIME_LIB=/usr/local/lib/libonnxruntime.so \
@@ -134,7 +135,7 @@ stt:
   providers:
     shenava:
       type: command
-      command: ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/stt.py --quiet {input_path}
+      command: ~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/scripts/stt.py --quiet {input_path}
 ```
 
 Then restart the gateway.
@@ -195,7 +196,7 @@ transcribed text, STT is working.
 To test from the terminal:
 
 ```bash
-~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/stt.py test_voice.ogg
+~/.hermes/hermes-agent/venv/bin/python ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/scripts/stt.py test_voice.ogg
 ```
 
 ## Common Pitfalls

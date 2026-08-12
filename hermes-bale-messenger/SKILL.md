@@ -7,7 +7,7 @@ license: MIT
 metadata:
   hermes:
     tags: [bale, persian, messenger, platform, adapter, bot]
-    related_skills: [hermes-bale-stt]
+    related_skills: [hermes-stt]
 ---
 
 # Bale Platform Adapter for Hermes
@@ -80,7 +80,7 @@ Bale Server ←→ HTTP Long Poll ←→ Hermes Gateway ←→ AI Agent
 1. **Bot blocked by user:** User must `/start` the bot before it can DM them.
 2. **Bot-to-bot blocked:** Bale (like Telegram) blocks bots from seeing each other's messages, even in groups. Use a user account bridge for bot-to-bot.
 3. **Group privacy:** The bot must be an admin to see all group messages, otherwise it only sees `/command` and replies.
-4. **Voice messages arrive empty?** Transcription needs an STT provider. The `hermes-bale-stt` skill in this repo provides Persian STT, or set `stt.provider` in `~/.hermes/config.yaml`.
+4. **Voice messages arrive empty?** Transcription needs an STT provider. The `hermes-stt` skill in this repo provides Persian STT, or set `stt.provider` in `~/.hermes/config.yaml`.
 5. **Cache after edits:** Always `find ~/.hermes/plugins/platforms/bale -name __pycache__ -exec rm -rf {} +` after editing adapter files.
 6. **Webhook blocks polling:** If you previously used webhook mode, call `deleteWebhook` before switching to polling — `curl -s "https://tapi.bale.ai/bot$BALE_BOT_TOKEN/deleteWebhook"`. Otherwise `getUpdates` returns nothing.
 7. **401 Unauthorized:** Token expired or regenerated from @BotFather. Get a new token and update `BALE_BOT_TOKEN` in `~/.hermes/.env`.

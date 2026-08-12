@@ -1,3 +1,4 @@
 # Prevent committing large model files (~126MB shenava-koochik, ~9MB hush ONNX models)
 shenava-koochik/
-hush_cpp/onnx/
+hush_cpp/
+

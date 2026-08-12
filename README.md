@@ -8,8 +8,8 @@ Three skills in one repo:
 | Skill | Install | Purpose |
 |-------|---------|---------|
 | `hermes-bale-messenger` | `--skill hermes-bale-messenger` | Bale platform adapter + 7 pitfalls |
-| `hermes-bale-stt` | `--skill hermes-bale-stt` | Persian speech-to-text via Shenava-Koochik |
-| `hermes-matcha-tts` | `--skill hermes-matcha-tts` | Persian TTS via MatchaTTS daemon (Zahra voice) |
+| `hermes-stt` | `--skill hermes-stt` | Persian speech-to-text via Shenava-Koochik |
+| `hermes-tts` | `--skill hermes-tts` | Persian TTS via MatchaTTS daemon (Zahra voice) |
 
 ## Quick Install
 
@@ -18,21 +18,21 @@ Three skills in one repo:
 npx skills add mah92/hermes-bale-messenger-skills --skill hermes-bale-messenger
 
 # Persian STT
-npx skills add mah92/hermes-bale-messenger-skills --skill hermes-bale-stt
-python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-bale-stt/scripts/download_models.py
+npx skills add mah92/hermes-bale-messenger-skills --skill hermes-stt
+python3 ~/.hermes/skills/hermes-bale-messenger-skills/hermes-stt/scripts/download_models.py
 
 # Persian TTS
-npx skills add mah92/hermes-bale-messenger-skills --skill hermes-matcha-tts
-# Then start the daemon: see hermes-matcha-tts SKILL.md
+npx skills add mah92/hermes-bale-messenger-skills --skill hermes-tts
+# Then start the daemon: see hermes-tts SKILL.md
 ```
 
 ## What You Get
 
 - **hermes-bale-messenger:** Sends/receives text, voice, images, documents in Bale.
   Group chat support, typing indicators, user allowlisting, cron delivery.
-- **hermes-bale-stt:** Transcribes Persian voice messages.
+- **hermes-stt:** Transcribes Persian voice messages.
   Shenava-Koochik v1.0 (114M params, WER 7.49%), optional hush_cpp denoiser.
-- **hermes-matcha-tts:** Synthesizes Persian speech via MatchaTTS C++ daemon.
+- **hermes-tts:** Synthesizes Persian speech via MatchaTTS C++ daemon.
   Zahra voice (22050 Hz), vocos22 vocoder, ~200ms per request after daemon warm-up.
 
 ## Requirements
