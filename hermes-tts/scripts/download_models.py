@@ -26,18 +26,18 @@ MODEL_DIR = SKILL_DIR / "models"
 
 MODEL_FILES = [
     (
-        "zahra-22050-5.onnx",
-        "https://huggingface.co/mah92/Zahra-FA_EN-Matcha-TTS-Model/resolve/main/zahra-22050-5.onnx",
-        "Matcha-TTS ONNX model (Zahra voice)",
+        "matcha-fa_en-zahra-22050-5.onnx",
+        "https://huggingface.co/mah92/Zahra-FA_EN-22KHz-Matcha-TTS-Model/resolve/main/matcha-fa_en-zahra-22050-5.onnx",
+        "Matcha-TTS ONNX model (Zahra voice, 5 ODE steps)",
     ),
     (
         "vocos22.onnx",
         "https://huggingface.co/mah92/vocos-universal/resolve/main/vocos22.onnx",
-        "Vocos universal vocoder (22 kHz, any sample rate)",
+        "Vocos universal vocoder (any sample rate)",
     ),
     (
         "tokens_sherpa_with_fa.txt",
-        "https://huggingface.co/mah92/matcha-fa-tokens/resolve/main/tokens_sherpa_with_fa.txt",
+        "https://huggingface.co/mah92/Zahra-FA_EN-22KHz-Matcha-TTS-Model/resolve/main/tokens_sherpa_with_fa.txt",
         "Token map (IPA → model IDs)",
     ),
 ]
